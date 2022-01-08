@@ -1,6 +1,6 @@
 ## Generate a unique IBM i object id 
 
-The `shortid` [Nuget package](https://www.nuget.org/packages/shortid) generates unique, short ids. Out of the box is it is effective, but its default doesn't generate unique ids that work as IBM i object names. 
+The `shortid` [Nuget package](https://www.nuget.org/packages/shortid) generates unique, short ids. Out of the box is it is effective, but its default behavior doesn't generate unique ids that work as IBM i object names. 
 
 This wrapper function adds the constraints needed to generate a unique IBM i object name:
 
@@ -28,10 +28,18 @@ BegFunc GenerateUniqueId Type(*Char) Len(10)
 
     LeaveSr Id
 EndFunc
-```    
-Every call to GenerateUniqueId() returns a unique 10-character object id. To ensure the added constraints don't affect ShortId's unique random capabilities, I used this repo to generate 1m ids and check each for uniqueness. 
 
-The test took a long time (each unique id is stashed in a string collection -- that gets very large before the test is completed.) Despite taking a long time, the GenerateUniqueId() did indeed return 1m unique object ideas -- no duplicates. 
+...
+
+DclFld ObjectId Type(*Char) Len(10)
+
+ObjectId = GenerateUniqueId() 
+// ObjectId is now a unqiue 10 char IBM i object id.
+
+```    
+Every call to GenerateUniqueId() returns a unique 10-character IBM i object id. To ensure the added constraints don't affect `ShortId's` unique random capabilities, I used this repo to generate 1m ids and check each for uniqueness. 
+
+The test took a long time (each unique id is stashed in a string collection -- that gets very large before the test is completed.) Despite taking a long time, the GenerateUniqueId() function did indeed return 1m unique object ideas -- no duplicates. 
 
 ### To use the ShortID package in Visual RPG
 
