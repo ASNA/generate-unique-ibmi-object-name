@@ -1,0 +1,73 @@
+﻿
+Using System
+Using System.Collections
+Using System.Collections.Specialized 
+Using System.Text
+Using System.Text.RegularExpressions
+Using ShortId 
+Using ShortId.Configuration 
+
+BegClass Program
+
+    BegSr Main Shared(*Yes) Access(*Public) Attributes(System.STAThread())
+        DclSrParm args Type(*String) Rank(1)
+
+        DclFld tc Type(Tester) New() 
+
+        tc.Run() 
+
+        Console.WriteLine('Press any key to continue...') 
+        Console.ReadKey()
+    EndSr
+
+EndClass
+
+
+BegClass Tester
+
+    BegSr Run Access(*Public) 
+        DclFld Id Type(*Char) Len(10)
+        DclFld i Type(*Integer4) 
+
+        DclFld UsedIds Type(StringCollection) New()
+        DclFld Remainder Type(*Integer4) 
+
+        // Test GenerateUniqueId() 1,000,000 times for duplicates. This took a long time to run! 
+        // It succesfully accumulated all 1m generated unique ids in the StringCollection. 
+        // No duplicates were reported in the 1m test. 
+
+        Do FromVal(1) ToVal(1000000) Index(i) 
+            Id = GenerateUniqueId()
+            If UsedIds.IndexOf(Id) <> -1 
+                Console.WriteLine('Duplicate key found at {0}', i)
+                LeaveSr
+            EndIf 
+            UsedIds.Add(Id)
+            Math.DivRem(i, Convert.ToInt32(50000), *ByRef Remainder) 
+            If Remainder = 0
+                Console.WriteLine('{0:#,###}', i)
+            EndIf 
+        EndDo 
+
+        Console.WriteLine('No duplicates found in {0:#,###} attempts', i-1) 
+    EndSr
+
+    BegFunc GenerateUniqueId Type(*Char) Len(10) 
+        // ShortId class comes from this nuget package: https://www.nuget.org/packages/shortid
+
+        DclFld Id Type(*Char) Len(10)
+
+        DclFld Options Type(GenerationOptions) New()
+        Options.Length = 10
+        // ShortId needs at least 50 unique characters. 
+        ShortId.SetCharacters('ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890$#@abcdefghijklmnopqrstuvwxyz')
+
+        Id = ShortId.Generate(Options).ToUpper()
+        // Result cannot contain _, -, or start with a digit
+        DoWhile Id.Contains('_') OR Id.Contains('-') OR Regex.IsMatch(Id, "^\d") 
+            Id = ShortId.Generate(Options)
+        EndDo             
+
+        LeaveSr Id
+    EndFunc
+EndClass
